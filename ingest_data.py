@@ -88,12 +88,29 @@ def ingest_data():
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
+            tcg_id = data['id']
+        
+            # Finde den relativen Pfad der JSON-Datei zum DATA_ROOT_DIR
+            # z.B. "bw1\bw1-1.json"
+            relative_json_path = os.path.relpath(file_path, DATA_ROOT_DIR)
+            
+            # Ersetze die Dateiendung .json durch .png
+            # z.B. "bw1\bw1-1.png"
+            relative_image_path = os.path.splitext(relative_json_path)[0] + ".png"
+            
+            # Erstelle die URL: Ersetze OS-Trennzeichen (\) durch URL-Trennzeichen (/)
+            # und stelle den Mount-Point '/images' voran.
+            # z.B. "/images/bw1/bw1-1.png"
+            local_image_url = f"/images/{relative_image_path.replace(os.sep, '/')}"
+
             set_data = data.get('set', {})
             set_id = set_map.get(set_data.get('name')) if isinstance(set_data, dict) else None
             rarity_id = rarity_map.get(set_data.get('rarity')) if isinstance(set_data, dict) else None
             
             new_card = Card(
-                tcg_id=data['id'], name=data['name'], image_url=data.get('image'),
+                tcg_id=data['id'], 
+                name=data['name'], 
+                image_url=local_image_url,
                 supertype=data['supertype'],
                 hp=int(data['hp']) if data.get('hp') and str(data['hp']).isdigit() else None,
                 number_in_set=set_data.get('number') if isinstance(set_data, dict) else None,
