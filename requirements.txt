@@ -1,0 +1,5 @@
+SQLAlchemy
+psycopg2-binary
+tqdm
+fastapi[all]
+psycopg2-binary

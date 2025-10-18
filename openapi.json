@@ -1,0 +1,693 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Pokenizer API",
+    "description": "Eine API zum Durchsuchen und Verwalten von Pokémon-Sammelkarten.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/cards/": {
+      "get": {
+        "tags": ["Cards"],
+        "summary": "Search Cards",
+        "description": "Sucht und listet Karten mit erweiterten Filtern und Paginierung auf.\nAlle Filter können kombiniert werden.",
+        "operationId": "search_cards_cards__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filtert Karten, deren Name den Text enthält (Groß-/Kleinschreibung irrelevant).",
+              "title": "Name"
+            },
+            "description": "Filtert Karten, deren Name den Text enthält (Groß-/Kleinschreibung irrelevant)."
+          },
+          {
+            "name": "supertype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filtert nach exaktem Supertype ('Pokémon', 'Trainer', 'Energy').",
+              "title": "Supertype"
+            },
+            "description": "Filtert nach exaktem Supertype ('Pokémon', 'Trainer', 'Energy')."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filtert Pokémon nach einem exakten Typ (z.B. 'Feuer').",
+              "title": "Type"
+            },
+            "description": "Filtert Pokémon nach einem exakten Typ (z.B. 'Feuer')."
+          },
+          {
+            "name": "subtype",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filtert Karten nach einem exakten Subtyp (z.B. 'Basis', 'Phase-1').",
+              "title": "Subtype"
+            },
+            "description": "Filtert Karten nach einem exakten Subtyp (z.B. 'Basis', 'Phase-1')."
+          },
+          {
+            "name": "rarity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filtert Karten nach exaktem Seltenheits-Namen.",
+              "title": "Rarity"
+            },
+            "description": "Filtert Karten nach exaktem Seltenheits-Namen."
+          },
+          {
+            "name": "set_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "description": "Filtert Karten nach exaktem Set-Namen.",
+              "title": "Set Name"
+            },
+            "description": "Filtert Karten nach exaktem Set-Namen."
+          },
+          {
+            "name": "hp_gte",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }],
+              "description": "Filtert Pokémon, deren HP größer oder gleich diesem Wert sind.",
+              "title": "Hp Gte"
+            },
+            "description": "Filtert Pokémon, deren HP größer oder gleich diesem Wert sind."
+          },
+          {
+            "name": "hp_lt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }],
+              "description": "Filtert Pokémon, deren HP kleiner als dieser Wert sind.",
+              "title": "Hp Lt"
+            },
+            "description": "Filtert Pokémon, deren HP kleiner als dieser Wert sind."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Die Seitenzahl.",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Die Seitenzahl."
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Anzahl der Ergebnisse pro Seite.",
+              "default": 20,
+              "title": "Page Size"
+            },
+            "description": "Anzahl der Ergebnisse pro Seite."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cards/{tcg_id}": {
+      "get": {
+        "tags": ["Cards"],
+        "summary": "Get Card By Id",
+        "description": "Ruft alle Details für eine einzelne Karte anhand ihrer TCG-ID (z.B. \"me01-1\") ab.",
+        "operationId": "get_card_by_id_cards__tcg_id__get",
+        "parameters": [
+          {
+            "name": "tcg_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Tcg Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CardDetailResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/register": {
+      "post": {
+        "tags": ["Users & Authentication"],
+        "summary": "Register User",
+        "description": "Registriert einen neuen Benutzer.\n- Überprüft, ob Username oder E-Mail bereits existieren.\n- Hashes the password before saving.",
+        "operationId": "register_user_users_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/token": {
+      "post": {
+        "tags": ["Users & Authentication"],
+        "summary": "Login For Access Token",
+        "description": "Nimmt `username` und `password` aus einem Formular entgegen und gibt ein JWT-Token zurück.",
+        "operationId": "login_for_access_token_token_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_login_for_access_token_token_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Token" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sets/{set_name}/cards": {
+      "get": {
+        "tags": ["Sets"],
+        "summary": "Get Cards By Set Name",
+        "description": "Ruft alle Karten eines spezifischen Sets anhand des exakten Set-Namens ab.",
+        "operationId": "get_cards_by_set_name_sets__set_name__cards_get",
+        "parameters": [
+          {
+            "name": "set_name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Set Name" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CardListResponse" },
+                  "title": "Response Get Cards By Set Name Sets  Set Name  Cards Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sets/": {
+      "get": {
+        "tags": ["Helper Lists"],
+        "summary": "Get All Sets",
+        "description": "Gibt eine Liste aller existierenden Set-Namen zurück, sortiert nach Name.\nNützlich für Filter-Dropdowns.",
+        "operationId": "get_all_sets_sets__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/SetNameResponse" },
+                  "type": "array",
+                  "title": "Response Get All Sets Sets  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rarities/": {
+      "get": {
+        "tags": ["Helper Lists"],
+        "summary": "Get All Rarities",
+        "description": "Gibt eine Liste aller einzigartigen Seltenheiten zurück, sortiert nach Name.",
+        "operationId": "get_all_rarities_rarities__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RarityNameResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get All Rarities Rarities  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/types/": {
+      "get": {
+        "tags": ["Helper Lists"],
+        "summary": "Get All Types",
+        "description": "Gibt eine Liste aller Pokémon-Typen zurück, sortiert nach Name.",
+        "operationId": "get_all_types_types__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/TypeNameResponse" },
+                  "type": "array",
+                  "title": "Response Get All Types Types  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": ["Root"],
+        "summary": "Read Root",
+        "description": "Ein einfacher Willkommens-Endpunkt.",
+        "operationId": "read_root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Ability": {
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Text"
+          },
+          "type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": ["name"],
+        "title": "Ability"
+      },
+      "Artist": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "Artist"
+      },
+      "Attack": {
+        "properties": {
+          "name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Name"
+          },
+          "cost": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Cost"
+          },
+          "damage": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Damage"
+          },
+          "text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "title": "Attack"
+      },
+      "Body_login_for_access_token_token_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              { "type": "string", "pattern": "^password$" },
+              { "type": "null" }
+            ],
+            "title": "Grant Type"
+          },
+          "username": { "type": "string", "title": "Username" },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "title": "Password"
+          },
+          "scope": { "type": "string", "title": "Scope", "default": "" },
+          "client_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "format": "password",
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": ["username", "password"],
+        "title": "Body_login_for_access_token_token_post"
+      },
+      "CardDetailResponse": {
+        "properties": {
+          "tcg_id": { "type": "string", "title": "Tcg Id" },
+          "name": { "type": "string", "title": "Name" },
+          "image_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Image Url"
+          },
+          "supertype": { "type": "string", "title": "Supertype" },
+          "hp": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Hp"
+          },
+          "number_in_set": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Number In Set"
+          },
+          "evolves_from": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Evolves From"
+          },
+          "set": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Set" },
+              { "type": "null" }
+            ]
+          },
+          "rarity": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Rarity" },
+              { "type": "null" }
+            ]
+          },
+          "artist": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Artist" },
+              { "type": "null" }
+            ]
+          },
+          "types": {
+            "items": { "$ref": "#/components/schemas/Type" },
+            "type": "array",
+            "title": "Types",
+            "default": []
+          },
+          "subtypes": {
+            "items": { "$ref": "#/components/schemas/Subtype" },
+            "type": "array",
+            "title": "Subtypes",
+            "default": []
+          },
+          "attacks": {
+            "items": { "$ref": "#/components/schemas/Attack" },
+            "type": "array",
+            "title": "Attacks",
+            "default": []
+          },
+          "abilities": {
+            "items": { "$ref": "#/components/schemas/Ability" },
+            "type": "array",
+            "title": "Abilities",
+            "default": []
+          },
+          "rules": {
+            "items": { "$ref": "#/components/schemas/Rule" },
+            "type": "array",
+            "title": "Rules",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": ["tcg_id", "name", "supertype"],
+        "title": "CardDetailResponse",
+        "description": "Die vollständige Detailansicht einer Karte."
+      },
+      "CardListResponse": {
+        "properties": {
+          "tcg_id": { "type": "string", "title": "Tcg Id" },
+          "name": { "type": "string", "title": "Name" },
+          "image_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Image Url"
+          },
+          "set": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Set" },
+              { "type": "null" }
+            ]
+          },
+          "rarity": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/Rarity" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "type": "object",
+        "required": ["tcg_id", "name"],
+        "title": "CardListResponse",
+        "description": "Eine vereinfachte Kartenansicht für Listen."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PaginatedCardResponse": {
+        "properties": {
+          "page": { "type": "integer", "title": "Page" },
+          "page_size": { "type": "integer", "title": "Page Size" },
+          "total_items": { "type": "integer", "title": "Total Items" },
+          "total_pages": { "type": "integer", "title": "Total Pages" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/CardListResponse" },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total_items",
+          "total_pages",
+          "items"
+        ],
+        "title": "PaginatedCardResponse",
+        "description": "Das Modell für die paginierte Antwort bei der Kartensuche."
+      },
+      "Rarity": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "Rarity"
+      },
+      "RarityNameResponse": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "RarityNameResponse"
+      },
+      "Rule": {
+        "properties": { "text": { "type": "string", "title": "Text" } },
+        "type": "object",
+        "required": ["text"],
+        "title": "Rule"
+      },
+      "Set": {
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "release_date": {
+            "anyOf": [
+              { "type": "string", "format": "date" },
+              { "type": "null" }
+            ],
+            "title": "Release Date"
+          }
+        },
+        "type": "object",
+        "required": ["name"],
+        "title": "Set"
+      },
+      "SetNameResponse": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "SetNameResponse"
+      },
+      "Subtype": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "Subtype"
+      },
+      "Token": {
+        "properties": {
+          "access_token": { "type": "string", "title": "Access Token" },
+          "token_type": { "type": "string", "title": "Token Type" }
+        },
+        "type": "object",
+        "required": ["access_token", "token_type"],
+        "title": "Token"
+      },
+      "Type": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "Type"
+      },
+      "TypeNameResponse": {
+        "properties": { "name": { "type": "string", "title": "Name" } },
+        "type": "object",
+        "required": ["name"],
+        "title": "TypeNameResponse"
+      },
+      "User": {
+        "properties": {
+          "username": { "type": "string", "title": "Username" },
+          "email": { "type": "string", "title": "Email" },
+          "id": { "type": "integer", "title": "Id" },
+          "is_active": { "type": "boolean", "title": "Is Active" }
+        },
+        "type": "object",
+        "required": ["username", "email", "id", "is_active"],
+        "title": "User"
+      },
+      "UserCreate": {
+        "properties": {
+          "username": { "type": "string", "title": "Username" },
+          "email": { "type": "string", "title": "Email" },
+          "password": { "type": "string", "title": "Password" }
+        },
+        "type": "object",
+        "required": ["username", "email", "password"],
+        "title": "UserCreate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
