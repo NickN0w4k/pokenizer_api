@@ -10,7 +10,7 @@ router = APIRouter(
     tags=["Helper Lists"] # Gruppiert diese Endpunkte in der Doku
 )
 
-@router.get("/sets/", response_model=List[schemas.SetNameResponse])
+@router.get("/sets", response_model=List[schemas.Set]) 
 def get_all_sets(db: Session = Depends(database.get_db)):
     """
     Gibt eine Liste aller existierenden Set-Namen zurück, sortiert nach Name.
