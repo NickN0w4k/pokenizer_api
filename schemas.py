@@ -7,6 +7,7 @@ from datetime import date
 
 class Set(BaseModel):
     name: str
+    symbol_url: Optional[str] = None
     release_date: Optional[date] = None
     class Config: from_attributes = True
 

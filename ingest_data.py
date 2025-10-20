@@ -40,6 +40,8 @@ def ingest_data():
     print("\n[1/3] Lese alle JSON-Dateien, um einzigartige Werte zu sammeln...")
     all_sets, all_rarities, all_types, all_subtypes, all_artists = set(), set(), set(), set(), set()
     set_release_dates = {}
+    
+    set_name_to_id_map = {}
 
     for file_path in tqdm(json_files, desc="Sammle Werte"):
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -52,12 +54,24 @@ def ingest_data():
                     all_sets.add(set_name)
                     if set_name not in set_release_dates and set_data.get('releaseDate'):
                         set_release_dates[set_name] = set_data.get('releaseDate')
+                    
+                    if set_name not in set_name_to_id_map:
+                        # Extrahiere den Ordnernamen (z.B. "bw1") aus dem Pfad
+                        relative_path = os.path.relpath(file_path, DATA_ROOT_DIR)
+                        set_id_ordner = relative_path.split(os.sep)[0]
+                        set_name_to_id_map[set_name] = set_id_ordner
                 
                 all_rarities.add(set_data.get('rarity'))
             
             if data.get('types'): all_types.update(data['types'])
             if data.get('subtypes'): all_subtypes.update(data['subtypes'])
             if data.get('artist'): all_artists.add(data['artist'])
+            
+        # --- DEBUG-BEFEHL 1 HINZUFÜGEN ---
+        print("\n--- DEBUG: Inhalt von set_name_to_id_map ---")
+        print(set_name_to_id_map)
+        print("------------------------------------------\n")
+        # ----------------------------------
 
     print("\n[2/3] Befülle Lookup-Tabellen in der Datenbank...")
     set_map, rarity_map, type_map, subtype_map, artist_map = {}, {}, {}, {}, {}
@@ -70,8 +84,31 @@ def ingest_data():
                 release_date_obj = datetime.strptime(release_date_str, '%Y/%m/%d').date()
             except ValueError:
                 print(f"Warnung: Ungültiges Datumsformat für Set '{name}': {release_date_str}")
+                
+        set_id = set_name_to_id_map.get(name) # z.B. "bw1"
+        symbol_path = None # Standardmäßig kein Symbol
+        
+        if set_id:
+            # Möglichkeit 1: "bw1-expansion-symbol.png"
+            filename_1 = f"{set_id}-expansion-symbol.png"
+            local_path_1 = os.path.join(DATA_ROOT_DIR, set_id, filename_1)
 
-        obj = Set(name=name, release_date=release_date_obj)
+            # Möglichkeit 2: "bw1-exp-symbol.png"
+            filename_2 = f"{set_id}-exp-symbol.png"
+            local_path_2 = os.path.join(DATA_ROOT_DIR, set_id, filename_2)
+
+            if os.path.exists(local_path_1):
+                symbol_path = f"/images/{set_id}/{filename_1}"
+                print(">> GEFUNDEN (1):", symbol_path)
+            elif os.path.exists(local_path_2):
+                symbol_path = f"/images/{set_id}/{filename_2}"
+                print(">> GEFUNDEN (2):", symbol_path)
+            else:
+                print(">> NICHTS GEFUNDEN")
+        else:
+            print(">> Keine Set-ID für diesen Namen gefunden.")            
+
+        obj = Set(name=name, release_date=release_date_obj, symbol_url=symbol_path)
         session.add(obj)
         session.commit()
         set_map[name] = obj.id

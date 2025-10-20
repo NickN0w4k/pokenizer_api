@@ -25,7 +25,8 @@ class Set(Base):
     __tablename__ = 'sets'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
-    release_date = Column(Date, nullable=True) # Korrekter Datentyp
+    release_date = Column(Date, nullable=True)
+    symbol_url = Column(String, nullable=True)
     cards = relationship('Card', back_populates='set')
 
 class Rarity(Base):
